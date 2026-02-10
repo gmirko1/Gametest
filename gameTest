@@ -1,0 +1,93 @@
+#include "DisplayModule.h"
+#include "InputModule.h"
+#include "MovingObjectModule.h"
+#include "GameObject.h"
+
+bool gamestate = 0;
+
+GameObject player = {64, 64, 5, 5, BLUE, OBJECT_PLAYER};
+ButtonState aState, bState, upState, downState, leftState, rightState;
+
+void setup() {
+  Serial.begin(9600);
+  DisplaySetup();
+  InputSetup();
+  DrawTitleScreen(BLUE, 3, " GAME     Time", true);
+  DisplaySize(128, 128);
+}
+
+void loop() {
+  if (!gamestate) {
+    UpdateFlicker();
+  }
+
+  aState = ReadButton(button_A);
+  bState = ReadButton(button_B);
+  upState = ReadButton(button_UP);
+  downState = ReadButton(button_DOWN);
+  leftState = ReadButton(button_LEFT);
+  rightState = ReadButton(button_RIGHT);
+
+  if ((aState == BUTTON_PRESSED) && (gamestate == 0)) {
+    tft.fillScreen(BLACK);
+    //buttonAClicked = 1;
+    tft.setCursor(4, 100);
+    delay(2000);
+    tft.fillScreen(BLACK);
+    gamestate = 1;
+  }   
+
+
+
+  if (gamestate==1) {
+    DrawObject(player);
+    if (aState == BUTTON_PRESSED) {
+      player.color=YELLOW;
+      tft.fillScreen(BLACK);
+    }else if(bState == BUTTON_PRESSED) {
+      player.color=WHITE;
+      tft.fillScreen(BLACK);
+    }
+
+    if (downState == BUTTON_PRESSED) {
+      MoveObject(&player, 0,1);
+      delay(20);
+      tft.drawRect((player.x)-1,player.y,&player,&player,BLACK);
+
+    }
+    if (upState == BUTTON_PRESSED) {
+      MoveObject(&player, 0,-1);
+      delay(20);
+      tft.drawRect((player.x)-1,player.y,&player,&player,BLACK);
+    }
+    
+    if (leftState == BUTTON_PRESSED) {
+      MoveObject(&player, -1,0);
+      delay(20);
+      tft.drawRect((player.x)-1,player.y,&player,&player,BLACK);
+    }
+    if (rightState == BUTTON_PRESSED) {
+      MoveObject(&player, 1,0);
+      delay(20);
+      tft.drawRect((player.x)-1,player.y,&player,&player,BLACK);
+
+    }
+
+    if(player.x < Min_X ) {
+      player.x = Min_X+(player.width);
+    }
+    if(player.x > Max_X ) {
+      player.x = Max_X-(player.width);
+    }
+    if(player.y < Min_Y ) {
+      player.y = Min_Y+1;
+    }
+    if(player.y > Max_Y ) {
+      player.y = Max_Y-1;
+    }
+
+  }
+}
+
+    
+
